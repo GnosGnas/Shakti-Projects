@@ -1,25 +1,20 @@
-// Rho function not fully generalised (t range)
-
 import KeccakConstants::*;
 import Vector::*;
 
-// Theta(2)
-function m modfunc_l(m a, m b) provisos(Arith#(m), Ord#(m)); //not generalised - b is positive - a<b
+function m modfunc_l(m a, m b) provisos(Arith#(m), Ord#(m)); //b is positive - a<b
     if(a < 0)
         return b + a;
     else
         return a;
 endfunction
 
-// Theta, Chi(2)
-function m modfunc_g(m a, m b) provisos(Arith#(m), Ord#(m)); //not generalised - b is positive - a>b
+function m modfunc_g(m a, m b) provisos(Arith#(m), Ord#(m)); //b is positive - a>b
     if(a >= b)
         return a - b;
     else
         return a;
 endfunction
 
-//Verified
 function KArray theta(KArray inp);
     Vector#(Sidelength, Bit#(W_param)) temp1 = replicate(0); //5x64
     Vector#(Sidelength, Bit#(W_param)) temp2 = replicate(0); //5x64
@@ -35,7 +30,6 @@ function KArray theta(KArray inp);
             begin
                 temp1[i][k] = temp1[i][k] ^ inp[i][j][k];
             end
-            //
         end
 
     for(Integer i = 0; i < sidelength; i = i+1) //5
@@ -43,7 +37,6 @@ function KArray theta(KArray inp);
         begin
             //D[x,z]
             temp2[i][k] = temp1[modfunc_l((i-1), sidelength)][k] ^ temp1[modfunc_g((i+1), sidelength)][modfunc_l((k-1), w_param)];
-            //
 
             for(Integer j = 0; j < sidelength; j = j+1) //5
                 out[i][j][k] = inp[i][j][k] ^ temp2[i][k];
@@ -51,8 +44,7 @@ function KArray theta(KArray inp);
     return out;
 endfunction
 
-//Verified
-function KArray rho(KArray inp); ////Not generalised
+function KArray rho(KArray inp);
     KArray out = defaultValue;
     Integer i=1;
     Integer j=0;
@@ -102,7 +94,6 @@ function KArray rho(KArray inp); ////Not generalised
     return out;
 endfunction
 
-//verified
 function KArray pi(KArray inp);
     KArray out = defaultValue;
 
@@ -123,7 +114,6 @@ function KArray pi(KArray inp);
     return out;
 endfunction
 
-//verified
 function KArray chi(KArray inp);
     KArray out = defaultValue;
 
@@ -134,8 +124,7 @@ function KArray chi(KArray inp);
     return out;
 endfunction
 
-//Verified
-function Bit#(1) rc_func(int t);  //t ranges from 0 to l_param + 7*(nr-1) //////Optimisation needed?
+function Bit#(1) rc_func(int t);  //t ranges from 0 to l_param + 7*(nr-1)
     Bit#(8) c = 0;          
     Bit#(9) ctemp = 0;
     Bit#(T_Size) t_values = 0; //l + 7*(nr-1) + 1
@@ -157,44 +146,5 @@ function Bit#(1) rc_func(int t);  //t ranges from 0 to l_param + 7*(nr-1) //////
     end
 
     return t_values[t];
-endfunction
-
-
-
-//////NOT USED
-//Verified
-//Reduce ir size
-function KArray iota(KArray inp, int ir);
-    KArray out = defaultValue;
-    Bit#(W_param) rc = 0; //64
-
-    for(Integer i = 0; i < sidelength; i = i+1) //5
-        for(Integer j = 0; j < sidelength; j = j+1) //5
-            for(Integer k = 0; k < w_param; k = k+1) //64
-                out[i][j][k] = inp[i][j][k];
-    
-    for(Integer j = 0; j <= l_param; j = j+1) //6
-        rc[2**j - 1] = rc_func(fromInteger(j) + 7*ir);
-
-    for(Integer k = 0; k < w_param; k = k+1) //64
-        out[0][0][k] = out[0][0][k] ^ rc[k];
-        
-    return out;
-endfunction
-
-
-function KArray roundfunction(KArray inp, int ir);
-    return iota(chi(pi(rho(theta(inp)))), ir);    
-endfunction
-
-
-
-function Bit#(8) flipper(Bit#(8) inp);///////
-    Bit#(8) outp = defaultValue;
-
-    for(Integer i=0; i < 8; i=i+1)
-        outp[i] = inp[8 - 1 - i];
-    
-    return outp;
 endfunction
 
