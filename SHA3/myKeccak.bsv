@@ -146,11 +146,8 @@ package myKeccak;
 		endmethod
 
 		method ActionValue#(Bit#(Out_length)) state_output if(out_ready);
-			KState data = 0;
 			Bit#(Out_length) outp = 0;
 			Bit#(Out_length) outp2 = 0;
-			Vector#(TMul#(Out_length, 64),  Bit#(64)) temp1 = defaultValue;
-			Vector#(TMul#(Out_length, 64),  Bit#(64)) temp2 = defaultValue;
 /*
 			for(Integer i=0; i<sidelength; i=i+1)
 			for(Integer j=0; j<sidelength; j=j+1)
