@@ -7,7 +7,7 @@ To run all the files, run the following command in terminal:
 *make all*
 
 To test only the Keccak Module, run the following command in terminal:
-*make Keccak_tb*
+*make Keccak_test*
 
 ## Overview of SHA3 implementation:
 
