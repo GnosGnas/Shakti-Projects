@@ -1,4 +1,4 @@
-package Tb;
+package Keccak_Tb;
     import KeccakConstants::*;
     import myKeccak::*;
     import Wire_functions::*;
