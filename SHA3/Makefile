@@ -27,7 +27,7 @@ all: prereq Keccak_main SHA3_main SHA3_test
 prereq Wire_functions.bo KeccakConstants.bo: Wire_functions.bsv KeccakConstants.bsv
 	@echo "prereq: Compiling prerequisite files..."
 	bsc -verilog KeccakConstants.bsv
-	bsc -verilog Wirefunctions.bsv
+	bsc -verilog Wire_functions.bsv
 
 clean:
 	@echo "Cleaning up..."
