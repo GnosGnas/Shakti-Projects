@@ -1,10 +1,10 @@
 
 package sha3tb;
-import mySHA32::*;
+import mySHA3::*;
 
 (*synthesize*)
 module mkSHA3tb (Empty);
-    SHA3_ifc mod_main <- mkSHA32;
+    SHA3_ifc mod_main <- mkSHA3;
 
     Reg#(Bit#(Addr_size)) addr <- mkReg(0);
     Reg#(Bit#(Addr_size)) dest_addr <- mkReg(0);
