@@ -1,6 +1,6 @@
 
-package mySHA32;
-    import myKeccak2::*;
+package mySHA3;
+    import myKeccak::*;
     import BRAMCore::*;
     import KeccakConstants::*;
     import BRAMFIFO::*;
@@ -72,7 +72,7 @@ package mySHA32;
     endinterface
 
     (*synthesize*)
-    module mkSHA32 (SHA3_ifc);
+    module mkSHA3 (SHA3_ifc);
         Reg#(Bit#(Addr_size)) addr <- mkReg(defaultValue);
         Reg#(Maybe#(Bit#(Addr_size))) dest_addr <- mkReg(tagged Invalid);
         Reg#(Bool) pass_addr_flag <- mkReg(False);
@@ -91,7 +91,7 @@ package mySHA32;
         PulseWire disable_pass_addr <- mkPulseWire;
 
         BRAM_PORT#(Bit#(Addr_size), Bit#(Data_size)) myMem <- mkMem; 
-        Keccak_ifc core_mod <- mkKeccak2;
+        Keccak_ifc core_mod <- mkKeccak;
         FIFOF#(Bit#(Data_size)) bram_fifo <- mkSizedBRAMFIFOF(bfifo_size); 
 
         rule pass_addr ((pass_addr_flag) && (!done_flag) && (counter1 < fromInteger(n_packet_input) && (counter1 >= 0)) && (!disable_pass_addr));  //last conds only cos of warning
