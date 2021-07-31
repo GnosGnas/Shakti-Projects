@@ -2,13 +2,13 @@ BSCFLAGS=+RTS -K200M -RTS -steps-warn-interval 4000000 \
 -steps-max-intervals 3000000
 
 SHA3_test: mySHA3.bo sha3tb.bsv
-	@echo: "SHA3-test: Compiling and running TestBench for SHA3 Modules..."
+	@echo "SHA3-test: Compiling and running TestBench for SHA3 Modules..."
 	bsc -verilog sha3tb.bsv
 	bsc -e mkSHA3tb mkSHA3tb.v
 	./a.out
 
 SHA3_main mySHA3.bo: myKeccak.bo mySHA3.bsv
-	@echo: "SHA3-main: Compiling mySHA3.bsv..."
+	@echo "SHA3-main: Compiling mySHA3.bsv..."
 	bsc -verilog mySHA3.bsv
 
 Keccak_test: myKeccak.bo Keccak_Tb.bsv
