@@ -1,0 +1,3 @@
+[submodule "Side-Channel-Analysis"]
+	path = Side-Channel-Analysis
+	url = https://github.com/GnosGnas/Side-Channel-Analysis
