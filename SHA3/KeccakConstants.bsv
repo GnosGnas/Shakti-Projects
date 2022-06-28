@@ -1,10 +1,17 @@
+/*
+Package name: KeccakConstants
+Author name: Surya Prasad S (EE19B121)
+
+Description: This package contains all the parameters used in this project.
+*/
+
 import Vector::*;
 
 typedef 5 Sidelength;
-typedef TMul#(Sidelength, Sidelength) Blocks;
-
 typedef 256 Out_length;
 typedef 6 L_param;
+
+typedef TMul#(Sidelength, Sidelength) Blocks;
 
 typedef TMul#(Out_length, 2) C_param;             // 2*output
 typedef TExp#(L_param) W_param;

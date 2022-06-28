@@ -1,13 +1,21 @@
-package myKeccak;
+/*
+Package name: Keccak
+Author name: Surya Prasad S (EE19B121)
+
+Description: Main package for Keccak function
+*/
+
+package Keccak;
+	// Importing required packages
 	import KeccakConstants::*;
 	import Wire_functions::*;
 	import Vector::*;
 	import ConfigReg::*;
 
-	Int#(5) init_ir = fromInteger(12 + 2*l_param - nr_param); //0
-	Int#(5) fin_ir = fromInteger(12 + 2*l_param - 1); //23
+	Int#(6) init_ir = fromInteger(12 + 2*l_param - nr_param); //0
+	Int#(6) fin_ir = fromInteger(12 + 2*l_param - 1);
 
-	typedef enum {THETA, RHO, PI, CHI, IOTA} Round_enum deriving(Bits, Eq);
+    typedef enum {THETA, RHO, PI, CHI, IOTA} Round_enum deriving(Bits, Eq);
 
 	interface Keccak_ifc;
 		method Action state_input(Bit#(R_param) inp); //1088
@@ -15,112 +23,89 @@ package myKeccak;
 		method ActionValue#(Bit#(Out_length)) state_output; //256
 	endinterface
 
-	(*synthesize*)
+	//(*synthesize*)
 	module mkKeccak(Keccak_ifc);
 		Reg#(KArray) reg_data <- mkReg(zero_array); //5x5x64
-		Reg#(Int#(5)) ir <- mkReg(init_ir); //ir size to be changed
+		Reg#(Int#(6)) ir <- mkReg(init_ir); 
 		Reg#(Bool) go <- mkConfigReg(False);
 		Reg#(Bool) out_ready <- mkReg(False);
 		Wire#(Bool) reset_flag <- mkDWire(False);
         Reg#(Round_enum) status <- mkReg(THETA);
 		
         rule func1( go && (status == THETA) );
-		let storer1 = reg_data;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("inp:func1:%h round:%d", storer1[j][i], i+j);
-*/
-		let storer2 = theta(storer1);
-		reg_data <= storer2;
-		status <= RHO;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("func1:%h round:%d", storer2[j][i], i+j);
-*/
+            let temp1 = reg_data;
+            let temp2 = theta(temp1);
+            reg_data <= temp2;
+            status <= RHO;
+		/*
+			for(Integer i=0; i<sidelength; i=i+1)
+				for(Integer j=0; j<sidelength; j=j+1)
+					$display("Theta:%h round:%d", temp2[j][i], i+j);
+		*/
         endrule
 
         rule func2( go && (status == RHO) );
-		let storer1 = reg_data;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("inp:func2:%h round:%d", storer1[j][i], i+j);
-*/
-		let storer2 = rho(storer1);
-		reg_data <= storer2;
-		status <= PI;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("func2:%h round:%d", storer2[j][i], i+j);
-*/
+            let temp1 = reg_data;
+            let temp2 = rho(temp1);
+            reg_data <= temp2;
+            status <= PI;
+		/*
+			for(Integer i=0; i<sidelength; i=i+1)
+				for(Integer j=0; j<sidelength; j=j+1)
+					$display("Rho:%h round:%d", temp2[j][i], i+j);
+		*/
         endrule        
 
         rule func3( go && (status == PI) );
-		let storer1 = reg_data;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("inp:func3:%h round:%d", storer1[j][i], i+j);
-*/
-		let storer2 = pi(storer1);
-		reg_data <= storer2;
-		status <= CHI;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("func3:%h round:%d", storer2[j][i], i+j);
-*/
+            let temp1 = reg_data;
+            let temp2 = pi(temp1);
+            reg_data <= temp2;
+            status <= CHI;
+		/*
+			for(Integer i=0; i<sidelength; i=i+1)
+				for(Integer j=0; j<sidelength; j=j+1)
+					$display("Pi:%h round:%d", temp2[j][i], i+j);
+		*/
         endrule
 
         rule func4( go && (status == CHI) );
-		let storer1 = reg_data;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("inp:func4:%h round:%d", storer1[j][i], i+j);
-*/
-		let storer2 = chi(storer1);
-		reg_data <= storer2;
-		status <= IOTA;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("func4:%h round:%d", storer2[j][i], i+j);
-*/
+            let temp1 = reg_data;
+            let temp2 = chi(temp1);
+            reg_data <= temp2;
+            status <= IOTA;
+		/*
+			for(Integer i=0; i<sidelength; i=i+1)
+				for(Integer j=0; j<sidelength; j=j+1)
+					$display("Chi:%h round:%d", temp2[j][i], i+j);
+		*/
         endrule            
 
         rule func5( go && (status == IOTA) );
-		KArray storer1 =defaultValue;
-		storer1 = reg_data;
-		Bit#(W_param) rc = 0; //64
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("inp:func5:%h round:%d", storer1[j][i], i+j);
-*/
-		for(Integer j = 0; j <= l_param; j = j+1) //6
-		rc[2**j - 1] = rc_func(fromInteger(j) + 7*unpack({0,pack(ir)}));
+            KArray temp1 = defaultValue;
+			temp1 = reg_data;
+			Bit#(W_param) rc = 0; //64
 
-		for(Integer k = 0; k < w_param; k = k+1) //64
-		storer1[0][0][k] = storer1[0][0][k] ^ rc[k];
+			for(Integer j = 0; j <= l_param; j = j+1) //6
+				rc[2**j - 1] = rc_func(fromInteger(j) + 7*unpack({0,pack(ir)})); 
+				
+			for(Integer k = 0; k < w_param; k = k+1) //64
+				temp1[0][0][k] = temp1[0][0][k] ^ rc[k];
 
-		reg_data <= storer1;
-		status <= THETA;
-		ir <= ir + 1;
-/*
-		for(Integer i=0; i<sidelength; i=i+1)
-		for(Integer j=0; j<sidelength; j=j+1)
-		$display("func5:%h round:%d", storer1[j][i], i+j);
-*/
+			reg_data <= temp1;
+            status <= THETA;
+            ir <= ir + 1;
+			/*
+			for(Integer i=0; i<sidelength; i=i+1)
+				for(Integer j=0; j<sidelength; j=j+1)
+					$display("Iota:%h round:%d", temp1[j][i], i+j);
+			*/
         endrule
 
         rule stopgo( (ir == fin_ir) && (status == IOTA) && (go) );
-		go <= False;
-		out_ready <= True;
+            go <= False;
+            out_ready <= True;
         endrule
+
 
 		method Action state_input(Bit#(R_param) inp) if(!go && !(reset_flag)); //1088
 			KArray lv_data = zero_array;
@@ -137,22 +122,24 @@ package myKeccak;
 			go <= True;
 			ir <= init_ir;
 			out_ready <= False;
-			status <= THETA;
+            status <= THETA;
 		endmethod
-
+		
 		method Action reset_module if(!go);
 			reg_data <= zero_array;
 			reset_flag <= True;
 		endmethod
 
+//create_clock -period 10.000 -name CLK -waveform {0.000 5.000} -add [get_nets CLK] //or get_ports
 		method ActionValue#(Bit#(Out_length)) state_output if(out_ready);
 			Bit#(Out_length) outp = 0;
 			Bit#(Out_length) outp2 = 0;
-/*
+
+			/*
 			for(Integer i=0; i<sidelength; i=i+1)
-			for(Integer j=0; j<sidelength; j=j+1)
-			$display("Keccak output:%h", reg_data[j][i]);
-*/
+				for(Integer j=0; j<sidelength; j=j+1)
+					$display("Keccak output:%h", reg_data[j][i]);
+			*/
 			for(Integer i=0; i < sidelength; i=i+1) //5
 				for(Integer k=0; k < w_param ; k=k+1) //64
 					if((i*w_param + k) < out_length)
@@ -198,4 +185,3 @@ package myKeccak;
 		endmethod
 	endmodule
 endpackage
-

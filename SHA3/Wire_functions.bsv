@@ -1,20 +1,32 @@
+/*
+Package name: Wire_functions
+Author name: Surya Prasad S (EE19B121)
+
+Description: Keccak algorithm uses a set of functions. Here all the functions have been made using combinational logic.
+*/
+
+// Note: Rho function is not fully generalised (t range)
+
 import KeccakConstants::*;
 import Vector::*;
 
-function m modfunc_l(m a, m b) provisos(Arith#(m), Ord#(m)); //b is positive - a<b
+// Theta(2)
+function m modfunc_l(m a, m b) provisos(Arith#(m), Ord#(m)); //not generalised - b is positive - a<b
     if(a < 0)
         return b + a;
     else
         return a;
 endfunction
 
-function m modfunc_g(m a, m b) provisos(Arith#(m), Ord#(m)); //b is positive - a>b
+// Theta, Chi(2)
+function m modfunc_g(m a, m b) provisos(Arith#(m), Ord#(m)); //not generalised - b is positive - a>b
     if(a >= b)
         return a - b;
     else
         return a;
 endfunction
 
+// THETA function
 function KArray theta(KArray inp);
     Vector#(Sidelength, Bit#(W_param)) temp1 = replicate(0); //5x64
     Vector#(Sidelength, Bit#(W_param)) temp2 = replicate(0); //5x64
@@ -30,6 +42,7 @@ function KArray theta(KArray inp);
             begin
                 temp1[i][k] = temp1[i][k] ^ inp[i][j][k];
             end
+            //
         end
 
     for(Integer i = 0; i < sidelength; i = i+1) //5
@@ -37,6 +50,7 @@ function KArray theta(KArray inp);
         begin
             //D[x,z]
             temp2[i][k] = temp1[modfunc_l((i-1), sidelength)][k] ^ temp1[modfunc_g((i+1), sidelength)][modfunc_l((k-1), w_param)];
+            //
 
             for(Integer j = 0; j < sidelength; j = j+1) //5
                 out[i][j][k] = inp[i][j][k] ^ temp2[i][k];
@@ -44,7 +58,8 @@ function KArray theta(KArray inp);
     return out;
 endfunction
 
-function KArray rho(KArray inp);
+// RHO function
+function KArray rho(KArray inp); ////Not generalised
     KArray out = defaultValue;
     Integer i=1;
     Integer j=0;
@@ -59,7 +74,7 @@ function KArray rho(KArray inp);
         for(Integer k = 0; k < w_param; k = k+1) //64
         begin
             Integer val = k - (((t+1)*(t+2))/2);
-            //out[i][j][k] = inp[i][j][modfunc_tl((k - ((t+1)*(t+2))/2), w_param)];
+            //out[i][j][k] = inp[i][j][modfunc_tl((k - ((t+1)*(t+2))/2), w_param)]; //This can't be synthesised
 
             if( (val < -256) )
                 out[i][j][k] = inp[i][j][val + 320];
@@ -94,6 +109,7 @@ function KArray rho(KArray inp);
     return out;
 endfunction
 
+// PI function
 function KArray pi(KArray inp);
     KArray out = defaultValue;
 
@@ -114,6 +130,7 @@ function KArray pi(KArray inp);
     return out;
 endfunction
 
+// CHI function
 function KArray chi(KArray inp);
     KArray out = defaultValue;
 
@@ -124,6 +141,7 @@ function KArray chi(KArray inp);
     return out;
 endfunction
 
+// RC function for Iota
 function Bit#(1) rc_func(int t);  //t ranges from 0 to l_param + 7*(nr-1)
     Bit#(8) c = 0;          
     Bit#(9) ctemp = 0;
@@ -148,3 +166,29 @@ function Bit#(1) rc_func(int t);  //t ranges from 0 to l_param + 7*(nr-1)
     return t_values[t];
 endfunction
 
+
+
+//////NOT USED - Iota function directly coded in the Keccak module
+//Verified
+function KArray iota(KArray inp, int ir);
+    KArray out = defaultValue;
+    Bit#(W_param) rc = 0; //64
+
+    for(Integer i = 0; i < sidelength; i = i+1) //5
+        for(Integer j = 0; j < sidelength; j = j+1) //5
+            for(Integer k = 0; k < w_param; k = k+1) //64
+                out[i][j][k] = inp[i][j][k];
+    
+    for(Integer j = 0; j <= l_param; j = j+1) //6
+        rc[2**j - 1] = rc_func(fromInteger(j) + 7*ir);
+
+    for(Integer k = 0; k < w_param; k = k+1) //64
+        out[0][0][k] = out[0][0][k] ^ rc[k];
+        
+    return out;
+endfunction
+
+// Overall function - also not used
+function KArray roundfunction(KArray inp, int ir);
+    return iota(chi(pi(rho(theta(inp)))), ir);    
+endfunction
